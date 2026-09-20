@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signals, Spectra &amp; Signal Processing – Review Quizzes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+<style>
+:root{
+  --bg:#EAF0F6; --grid:rgba(22,35,58,.06);
+  --surface:#FFFFFF; --ink:#16233A; --muted:#55657C; --line:#CFD9E6;
+  --accent:#0B6E7A; --accent-ink:#FFFFFF;
+  --ok:#177245; --ok-bg:#E1F3E8; --bad:#B42318; --bad-bg:#FCE7E4;
+  --warn:#8A5A00; --warn-bg:#FFF3D1; --code-bg:#E4ECF4;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1826; --grid:rgba(200,220,255,.05);
+    --surface:#16243A; --ink:#E6EDF7; --muted:#9FB0C8; --line:#2A3D5A;
+    --accent:#5CC8D0; --accent-ink:#06222A;
+    --ok:#5FD08F; --ok-bg:#12342A; --bad:#FF8A7E; --bad-bg:#3A1C1C;
+    --warn:#F2C572; --warn-bg:#3A3018; --code-bg:#22354F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1826; --grid:rgba(200,220,255,.05);
+  --surface:#16243A; --ink:#E6EDF7; --muted:#9FB0C8; --line:#2A3D5A;
+  --accent:#5CC8D0; --accent-ink:#06222A;
+  --ok:#5FD08F; --ok-bg:#12342A; --bad:#FF8A7E; --bad-bg:#3A1C1C;
+  --warn:#F2C572; --warn-bg:#3A3018; --code-bg:#22354F;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.5;
+}
+.wrap{max-width:720px;margin:0 auto;padding:22px 16px 56px}
+h1,h2,h3{font-family:var(--serif);font-weight:500;margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+sub,sup{line-height:0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.86em;background:var(--code-bg);border-radius:5px;padding:1px 6px;overflow-wrap:anywhere}
+pre.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;font-size:.9rem;line-height:1.5;background:var(--code-bg);border-radius:8px;padding:12px 14px;margin:12px 0 4px;overflow-x:auto;white-space:pre}
+
+/* Home */
+.hero h1{font-size:clamp(2rem,6vw,2.7rem);line-height:1.08;letter-spacing:-.01em}
+.hero p{color:var(--muted);margin:10px 0 0;max-width:52ch}
+.choice{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:14px;cursor:pointer}
+.choice:hover{border-color:var(--accent)}
+.choice h2{font-size:1.4rem}
+.choice p{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.choice .best{margin-top:10px;font-size:.88rem;font-weight:600;color:var(--accent)}
+.settings{margin-top:26px;padding:16px 18px;border:1px dashed var(--line);border-radius:12px}
+.settings h3{font-size:1.1rem;margin-bottom:8px}
+.settings label{display:flex;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer}
+.settings input{margin-top:5px;accent-color:var(--accent)}
+.settings small{display:block;color:var(--muted)}
+
+/* Quiz chrome */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.linkbtn{background:none;border:0;padding:6px 0;color:var(--accent);font-weight:600;cursor:pointer}
+.count{color:var(--muted);font-size:.92rem;font-variant-numeric:tabular-nums}
+.quizname{font-family:var(--serif);font-size:1.05rem;color:var(--muted);margin:0 0 4px}
+.trace{display:block;width:100%;height:34px;margin:2px 0 14px}
+.trace .ghost{stroke:var(--line)}
+.trace .live{stroke:var(--accent);stroke-dasharray:1;transition:stroke-dashoffset .6s ease}
+@media (prefers-reduced-motion:reduce){.trace .live{transition:none}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.qmeta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:.88rem;margin-bottom:10px}
+.pill{background:var(--warn-bg);color:var(--warn);border-radius:99px;padding:1px 10px;font-weight:600;font-size:.82rem}
+.qtext{font-family:var(--serif);font-size:1.32rem;line-height:1.4;margin:0}
+.qtext:focus{outline:none}
+.fig{display:block;margin:14px auto 2px;max-width:300px;width:100%;color:var(--ink)}
+.opts{margin-top:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:12px 14px;margin-top:10px;border:1px solid var(--line);border-radius:10px;background:transparent;cursor:pointer}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt[disabled]{cursor:default}
+.chip{flex:0 0 28px;height:28px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-weight:600;font-size:.85rem}
+.opt .txt{padding-top:2px}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok)}
+.opt.correct .chip{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.opt.wrong .chip{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.opt.dim{opacity:.55}
+.fb{margin-top:16px;padding:14px 16px;border-radius:10px;border-left:4px solid}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok)}
+.fb.no{background:var(--bad-bg);border-color:var(--bad)}
+.fb strong{display:block;margin-bottom:2px}
+.fb p{margin:4px 0 0}
+.note{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:.92rem}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:12px 20px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:hover{filter:brightness(1.06)}
+
+
+/* Navigation */
+.nav{display:flex;gap:10px;margin-top:14px}
+.nav .btn{flex:1}
+.btn[disabled]{opacity:.4;cursor:default;filter:none}
+.jump{margin-top:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.jump summary{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px;margin-top:12px}
+.cell{height:38px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer;font-variant-numeric:tabular-nums}
+.cell:hover{border-color:var(--accent)}
+.cell.ok{background:var(--ok-bg);border-color:var(--ok)}
+.cell.no{background:var(--bad-bg);border-color:var(--bad)}
+.cell.cur{outline:2px solid var(--accent);outline-offset:1px;font-weight:600}
+.legend{color:var(--muted);font-size:.85rem;margin:10px 0 0}
+.confirm{margin-bottom:12px}
+.confirm .actions{margin-top:10px}
+
+/* Results */
+.score{font-family:var(--serif);font-size:clamp(3rem,12vw,4.4rem);line-height:1;margin:6px 0 0}
+.score small{font-size:.4em;color:var(--muted);margin-left:6px}
+.sub{color:var(--muted);margin:8px 0 0}
+.topics{margin-top:18px}
+.trow{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin:12px 0}
+.tbar{grid-column:1/-1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.tbar i{display:block;height:100%;background:var(--accent)}
+h3.sec{font-size:1.25rem;margin:26px 0 4px}
+.rev{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:12px}
+.rev .q{font-family:var(--serif);font-size:1.12rem;margin:0 0 8px}
+.rev .ln{margin:3px 0;font-size:.95rem}
+.rev .ln b{font-weight:600}
+.rev .bad{color:var(--bad)} .rev .good{color:var(--ok)}
+.rev .why{margin-top:8px;color:var(--muted);font-size:.93rem}
+details{margin-top:18px}
+summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.hint{color:var(--muted);font-size:.85rem;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<noscript><div class="wrap">This quiz needs JavaScript enabled.</div></noscript>
+
+<script>
+/* ---------- Figures (Long Quiz 1, items 24 and 25) ---------- */
+const FIGS = {
+  fig1:'<svg class="fig" viewBox="0 0 260 110" role="img" aria-label="Figure 1: a smooth unbroken curve that falls, levels out, then rises"><line x1="6" y1="58" x2="254" y2="58" stroke="currentColor" stroke-width="1" opacity=".5"/><line x1="130" y1="6" x2="130" y2="104" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/><path d="M10 28 C60 34 90 86 140 86 C190 86 225 66 252 32" fill="none" stroke="currentColor" stroke-width="2.2"/><text x="240" y="52" font-size="11" fill="currentColor" font-style="italic">t</text><text x="134" y="16" font-size="11" fill="currentColor" font-style="italic">x(t)</text><text x="9" y="106" font-size="10" fill="currentColor" opacity=".7">Figure 1</text></svg>',
+  fig2:'<svg class="fig" viewBox="0 0 260 110" role="img" aria-label="Figure 2: a train of rectangular pulses switching between two levels"><line x1="6" y1="88" x2="254" y2="88" stroke="currentColor" stroke-width="1" opacity=".5"/><line x1="6" y1="6" x2="6" y2="104" stroke="currentColor" stroke-width="1" opacity=".5"/><path d="M8 88 L8 30 L38 30 L38 88 L66 88 L66 30 L104 30 L104 88 L130 88 L130 30 L168 30 L168 88 L194 88 L194 30 L236 30 L236 88 L252 88" fill="none" stroke="currentColor" stroke-width="2.2"/><text x="240" y="82" font-size="11" fill="currentColor" font-style="italic">t</text><text x="12" y="16" font-size="11" fill="currentColor" font-style="italic">x(t)</text><text x="9" y="106" font-size="10" fill="currentColor" opacity=".7" transform="translate(150 0)">Figure 2</text></svg>'
+};
+
+/* ---------- Question helper ---------- */
+function Q(q, o, a, exp, x){ return Object.assign({q:q, o:o, a:a, exp:exp}, x||{}); }
+
+/* ---------- Quiz 1: Long Quiz 1 (40 items, letter-ordered as in the exam) ---------- */
+const LQ = [
+Q("Signals that takes on specific values from a finite set of possible values.",
+  ["Discrete-time","Discrete-valued","Continuous-time","Continuous-valued"],1,
+  "Discrete-valued (digital) signals take their values from a finite set, usually equally spaced. Discrete-time only says the signal is defined at specific instants."),
+Q("Signals with finite energy.",
+  ["Energy Signal","Power Signal","Neither Energy nor Power Signal","Insufficient information"],0,
+  "Energy signals have finite energy (0 ≤ E &lt; ∞) and zero average power."),
+Q("Signals with infinite energy but finite average power.",
+  ["Energy Signal","Power Signal","Neither Energy nor Power Signal","Cannot be determined"],1,
+  "Power signals have infinite energy but finite average power (0 &lt; P &lt; ∞). Periodic signals are the classic case.",
+  {note:"Adapted item: the exam's wording (\"infinite energy\") also fits signals that are neither energy nor power signals, so \"but finite average power\" was added to make one answer clearly correct."}),
+Q("Describes the frequency content of a signal.",
+  ["System","Spectra","Signal","None of the above"],1,
+  "Spectra describe the frequency content of a signal."),
+Q("Signals that are functions of a continuous variable.",
+  ["Discrete-time","Discrete-valued","Continuous-time","Continuous-valued"],2,
+  "Continuous-time signals are functions of a continuous variable, defined for every value of time in an interval (a, b)."),
+Q("System is merely a function of one or more independent variables.",
+  ["True","False","False, one independent variable only","Cannot be determined"],1,
+  "False. It is a <em>signal</em> that is a function of one or more independent variables (e.g., S<sub>2</sub>(x, y)). A system is a device or software that performs an operation on a signal."),
+Q("Discrete-time signals are signals that are always taken at equally spaced intervals.",
+  ["True","False","False, Discrete-valued signals are","Cannot be determined"],1,
+  "False. Discrete-time signals are defined only at specific instants and are <em>usually</em> (not always) taken at equally spaced intervals for computational convenience."),
+Q("Signals that takes on all possible values on a finite or an infinite range.",
+  ["Discrete-time","Discrete-valued","Continuous-time","Continuous-valued"],3,
+  "Continuous-valued (analog) signals can take any value over a finite or infinite range. Continuous-time describes the independent variable, not the values."),
+Q("The smallest value of T<sub>0</sub> that satisfies the symmetric condition of the equation x(t) = x(t + T<sub>0</sub>) is the fundamental period of x(t).",
+  ["True","False","False, highest value of T<sub>0</sub>","Cannot be determined"],0,
+  "True. The fundamental period is the <em>smallest</em> positive T<sub>0</sub> for which x(t) = x(t + T<sub>0</sub>) for all t."),
+Q("A signal that exhibits uncertainty of its magnitude and phase at any given instant of time is a Deterministic Signal.",
+  ["True","False, it describes a Probabilistic (random) signal","False, it describes a Causal signal","Cannot be determined"],1,
+  "Uncertainty in magnitude and phase describes a random (probabilistic) signal. A deterministic signal has no such uncertainty and can be written as an equation.",
+  {note:"Adapted item: the exam's options \"False\" and \"False, Probabilistic Signal\" were both correct, so they were reworded to leave one best answer."}),
+Q("A signal that exists only with positive values of time.",
+  ["Causal Signals","Non-Causal Signals","Anti-Causal Signals","None of the above"],0,
+  "Causal signals exist only for positive time (t ≥ 0)."),
+Q("A signal that exist with negative values of time.",
+  ["Causal Signals","Non-Causal Signals","Anti-Causal Signals","None of the above"],2,
+  "Anti-causal signals exist only for negative time. Non-causal signals exist for both negative and positive time."),
+Q("A function is said to be an even symmetric function if",
+  ["x(t) = −x(−t)","x(t) = x(−t)","x(t) = x(t + T<sub>0</sub>)","x(t) = ½ [x(t) − x(−t)]"],1,
+  "Even symmetry means x(t) = x(−t): the graph mirrors about the vertical axis. x(t) = −x(−t) is odd symmetry.",
+  {note:"Adapted item: the exam's option c, x(t) = ½[x(t) + x(−t)], is also true only for even signals, so it duplicated the answer and was replaced."}),
+Q("The fundamental period of the signal 5 sin(36t) is",
+  ["18/π","36","π/18","18π"],2,
+  "T<sub>0</sub> = 2π/ω = 2π/36 = π/18."),
+Q("The amplitude of the signal 10 sin(50πt + π/6) is",
+  ["50","50π","10","π/6"],2,
+  "In A sin(ωt + φ) the amplitude is A = 10."),
+Q("The angular frequency of the signal 10 sin(50πt + π/6) is",
+  ["50","50π","π/6","10"],1,
+  "Angular frequency is the coefficient of t: ω = 50π rad/s (which is f = 25 Hz)."),
+Q("The frequency of the signal 300 sin(20πt + 5π/6) is",
+  ["10","50","5π/6","50π"],0,
+  "ω = 20π rad/s, so f = ω/2π = 10 Hz."),
+Q("The peak-to-peak value of the signal 300 sin(20πt + 5π/6) is",
+  ["20","150","300","600"],3,
+  "Peak-to-peak = 2A = 2(300) = 600."),
+Q("The signal x(t) = 10 sin 10t + 5 cos 30t + 15 sin 10t is",
+  ["periodic","a power signal","Both a and b","None of the above"],2,
+  "The components have ω = 10 and 30 rad/s, with periods π/5 and π/15. Their LCM is π/5, so the signal is periodic, and every periodic signal is a power signal. Both statements are true."),
+Q("Scaling a signal with a certain factor results in the signal average power multiplied",
+  ["by the square of that factor","by the square root of that factor","by twice that factor","the same amount"],0,
+  "Power depends on amplitude squared, so scaling a signal by k multiplies its average power by k²."),
+Q("The signal x(t) = 10 sin 10t + 5 cos 30t + 15 sin 15t has an energy of:",
+  ["0","∞","200","250"],1,
+  "A periodic signal never dies out, so its energy is infinite. It is a power signal.",{pts:2}),
+Q("The signal x(t) = 10 sin 10t + 5 cos 30t + 15 sin 15t has an average power of:",
+  ["0","∞","175","200"],2,
+  "The frequencies (10, 30, 15 rad/s) are different, so the powers add: 10²/2 + 5²/2 + 15²/2 = 50 + 12.5 + 112.5 = 175 W.",{pts:2}),
+Q("The signal x(t) = 10 sin 10t + 5 cos 30t + 15 sin 15t has a fundamental period of:",
+  ["2π/3","2π/15","π/15","2π/5"],3,
+  "Periods: 2π/10 = π/5, 2π/30 = π/15, 2π/15. LCM(numerators)/GCF(denominators) = 2π/5. Equivalent check: the fundamental frequency is gcd(10, 30, 15) = 5 rad/s, so T<sub>0</sub> = 2π/5.",{pts:2}),
+Q("Figure 1 shows a",
+  ["Continuous-time signal","Continuous-valued signal","Both a and b","None of the above"],2,
+  "Figure 1 is a smooth, unbroken curve: defined for every t (continuous-time) and able to take any value (continuous-valued).",{fig:"fig1"}),
+Q("Figure 2 shows a",
+  ["Continuous-time signal","Continuous-valued signal","Both a and b","None of the above"],0,
+  "Figure 2 is defined for every t (continuous-time), but it only switches between two amplitude levels, so it is discrete-valued, not continuous-valued.",{fig:"fig2"}),
+Q("End-of-day closing prices of JFC stocks can be considered a",
+  ["Discrete-time signal","Discrete-valued signal","Both a and b","None of the above"],0,
+  "One closing price per day is a signal sampled at specific instants: a discrete-time signal.",
+  {note:"Prices are quoted to the centavo, so someone could argue they are also discrete-valued. The intended answer focuses on the once-per-day sampling."}),
+Q("A certain street-lamp integrated with a light sensor automatically turns-on when below a certain threshold of light is detected, and turns off when light detected is above threshold. This can be considered a",
+  ["Continuous-valued signal","Discrete-valued signal","Both a and b","None of the above"],1,
+  "The lamp's state is either ON or OFF: a finite set of values, so it is discrete-valued."),
+Q("Speech is an example of",
+  ["Causal signals","Non-causal signals","Anti-causal signals","None of the above"],0,
+  "Speech is produced in real time: it does not exist before it starts, so with the time origin at the start of the utterance it is zero for t &lt; 0, i.e., causal.",
+  {note:"Judgment call: the question is open to interpretation, so double-check it against your instructor's answer key."}),
+Q("The fundamental period of the signal x(t) = 10 sin 5t cos 10t sin 15t is. (2pts)",
+  ["5/2π","The signal is not periodic","2π/5","π/5"],3,
+  "Product-to-sum gives 10 sin 5t cos 10t sin 15t = 2.5[1 − cos 10t + cos 20t − cos 30t]. The components at 10, 20, 30 rad/s share the fundamental frequency 10 rad/s, so T<sub>0</sub> = 2π/10 = π/5. Note that 2π/5 is also a period (two fundamental periods), but it is not the smallest.",
+  {pts:2, note:"Adapted item: the exam listed 2π/5 (the LCM of the three factors' periods) but not π/5, which is the true smallest period. Option d was changed from 2π to π/5. Ask your instructor which value they expect."}),
+Q("The energy of the signal x(t) = 10 sin 5t cos 10t sin 15t is. (2pts)",
+  ["∞","0","Finite but not zero","None of the above"],0,
+  "The signal is periodic and never decays, so its energy is infinite.",{pts:2}),
+Q("The average power of the signal x(t) = 10 sin 5t cos 10t sin 15t is. (2pts)",
+  ["25/4","125/8","125/4","25/8"],1,
+  "With x(t) = 2.5[1 − cos 10t + cos 20t − cos 30t]: the DC term gives 2.5² = 6.25 and each cosine gives 2.5²/2 = 3.125. P = 6.25 + 3(3.125) = 15.625 = 125/8 W.",{pts:2}),
+Q("The signal x(t) = 10 sin 5t cos 10t sin 15t is (2pts)",
+  ["An energy signal","A power signal","Neither energy nor power signal","Cannot be determined"],1,
+  "Infinite energy and finite average power (125/8 W): a power signal.",{pts:2}),
+Q("The signal x(t) = 10 sin 5t cos 10t sin 15t is (2pts)",
+  ["An even function","An odd function","Neither even nor odd but have both even and odd components","None of the above"],0,
+  "sin 5t and sin 15t are odd and cos 10t is even. Odd × even × odd = even. (The expansion also contains only a constant and cosines.)",{pts:2}),
+Q("The even component of the signal x(t) = 10 sin 5t cos 10t sin 15t is. (2pts)",
+  ["10 cos 10t","10 sin 5t sin 15t","10 sin 5t cos 10t sin 15t","0"],2,
+  "The signal is already even, so x<sub>e</sub>(t) = ½[x(t) + x(−t)] = x(t).",{pts:2}),
+Q("The odd component of the signal x(t) = 10 sin 5t cos 10t sin 15t is. (2pts)",
+  ["10 cos 10t","10 sin 5t sin 15t","10 sin 5t cos 10t sin 15t","0"],3,
+  "The signal is even, so x<sub>o</sub>(t) = ½[x(t) − x(−t)] = 0.",{pts:2}),
+Q("A heartbeat signal that is captured by an ECG where the energy of the electrical activity of the heart is finite over each heartbeat cycle.",
+  ["Energy Signal","Power Signal","Anti-causal Signal","Non-causal Signal"],0,
+  "Finite energy is the definition of an energy signal."),
+Q("The easiest way to generate a 7 x 7 matrix with random numbers is with the command",
+  ["ran(7,7)","rand(7,7)","ran(7)","rand(7)"],3,
+  "rand(n) returns an n×n matrix of uniformly distributed random numbers. rand(7,7) works too, but rand(7) is the shortest. ran is not a MATLAB function."),
+Q("Which of the following is a valid variable name in MATLAB?",
+  ["x3","pi","3xpi","Both a and b"],3,
+  "Names must start with a letter. x3 and pi are both valid (pi shadows the built-in constant, so avoid it in practice). 3xpi starts with a digit."),
+Q("Generate a 6-element row vector of equally spaced values from 1 to 21.",
+  ["1:6:21","linspace(6,1,21)","linspace(1,21,6)","linspace(1,6,21)"],2,
+  "linspace(a, b, n) gives n equally spaced points: linspace(1,21,6) = 1, 5, 9, 13, 17, 21."),
+Q("Generate a row vector where the elements are equally spaced by 6 units from 1 to 21.",
+  ["1:6:21","linspace(6,1,21)","linspace(1,21,6)","linspace(1,6,21)"],0,
+  "1:6:21 uses a step of 6: 1, 7, 13, 19 (it stops before overshooting 21).")
+];
+
+/* ---------- Quiz 2: Topics 1 to 3 (60 items) ---------- */
+const T1="Topic 1: Introduction to signals", T2="Topic 2: Periodicity, energy, power, even/odd", T3="Topic 3: Signal operations";
+const CT4=["Continuous-time, continuous-valued","Continuous-time, discrete-valued","Discrete-time, continuous-valued","Discrete-time, discrete-valued"];
+const TQ = [
+/* ---- Topic 1 (20) ---- */
+Q("Which statement best describes a signal?",
+  ["A physical device or software that performs an operation on data","A function of one or more independent variables that carries information","The frequency content of a system","A variable that can only depend on time"],1,
+  "A signal is a set of data or information: merely a function of one or more independent variables (e.g., S<sub>1</sub>(t) = 20t²). It need not depend on time; an image depends on x and y.",{t:T1}),
+Q("S<sub>2</sub>(x, y) = 3x + 2xy + 10y² is best classified as:",
+  ["A one-dimensional signal","A multidimensional signal","A system","A discrete-valued signal"],1,
+  "Two independent variables (x and y) make it a multidimensional signal, like an image I(x, y).",{t:T1}),
+Q("A filter that reduces noise corrupting an information-bearing signal is an example of a:",
+  ["Spectrum","System","Signal","Channel"],1,
+  "A system is a physical device (or software) that performs an operation on a signal.",{t:T1}),
+Q("Which term describes the frequency content of a signal?",
+  ["Spectra","Energy","Causality","Period"],0,
+  "Spectra describe the frequency content of a signal.",{t:T1}),
+Q("A color image described by R(x, y), G(x, y) and B(x, y) is:",
+  ["One-dimensional and single-channel","Multidimensional and single-channel","One-dimensional and multichannel","Multidimensional and multichannel"],3,
+  "Two independent variables make it multidimensional, and three separate signals (R, G, B) make it multichannel. A grayscale image I(x, y) would be single-channel.",{t:T1}),
+Q("Stereo audio consisting of a left signal L(t) and a right signal R(t) is:",
+  ["One-dimensional and multichannel","Multidimensional and single-channel","One-dimensional and single-channel","Multidimensional and multichannel"],0,
+  "Each channel depends only on time (one-dimensional), and there are two channels (multichannel).",{t:T1}),
+Q("Continuous-time signals are signals that are:",
+  ["Defined only at specific instants of time","Defined for every value of time in an interval (a, b)","Defined only for t ≥ 0","Restricted to a finite set of values"],1,
+  "Continuous-time signals are functions of a continuous variable, defined for every value of time in (a, b), where a can be −∞ and b can be +∞.",{t:T1}),
+Q("Discrete-time signals are usually taken at equally spaced intervals because:",
+  ["The signal must be periodic","It is computationally convenient and mathematically tractable","Equal spacing makes the signal discrete-valued","Unequal spacing is physically impossible"],1,
+  "Equal spacing is a convenience for computation and math, not a requirement of the definition.",{t:T1}),
+Q("Counting the number of cars that use a street every hour produces a:",
+  ["Continuous-time signal","Discrete-time signal","Anti-causal signal","Multichannel signal"],1,
+  "Accumulating a variable over a period of time is one of the two ways discrete-time signals arise (the other is sampling an analog signal at discrete instants).",{t:T1}),
+Q("A signal whose values come from a finite set of possible values, usually equally spaced, is:",
+  ["Continuous-valued (analog)","Discrete-valued (digital)","Continuous-time","Non-causal"],1,
+  "That is the definition of a discrete-valued (digital) signal.",{t:T1}),
+Q("A signal defined at every instant of time that can only equal 0 or 1 is:",
+  CT4,1,
+  "Defined for every t means continuous-time; only two allowed values means discrete-valued.",{t:T1}),
+Q("A voltage is sampled at equally spaced instants and each sample is kept with unlimited precision. The resulting signal is:",
+  CT4,2,
+  "Values exist only at sample instants (discrete-time), but each value can be any real number (continuous-valued).",{t:T1}),
+Q("A signal that exhibits no uncertainty in magnitude and phase at any instant, and can be described completely by an equation, is:",
+  ["Random (probabilistic)","Deterministic","Anti-causal","Multichannel"],1,
+  "Deterministic signals can be fully represented by a mathematical equation, so their value at any time can be predicted.",{t:T1}),
+Q("Which of these is best modeled as a random signal?",
+  ["5 sin(2πt)","e<sup>−t</sup>u(t)","Thermal noise voltage across a resistor","A unit step function"],2,
+  "Random signals are characterized by uncertainty and cannot be represented by an equation. The other three are exact mathematical functions.",{t:T1}),
+Q("Which signal is causal?",
+  ["e<sup>−at</sup>u(t), a &gt; 0","e<sup>at</sup>u(−t), a &gt; 0","sin(2πt) for −∞ &lt; t &lt; ∞","5e<sup>−2|t|</sup> for −∞ &lt; t &lt; ∞"],0,
+  "Causal signals exist only for positive time. u(t) forces e<sup>−at</sup>u(t) to be zero for t &lt; 0.",{t:T1}),
+Q("x(t) = e<sup>3t</sup>u(−t) is:",
+  ["Causal","Anti-causal","Periodic","Discrete-valued"],1,
+  "u(−t) is zero for t &gt; 0, so the signal exists only for negative time: anti-causal.",{t:T1}),
+Q("5e<sup>−2|t|</sup>, −∞ &lt; t &lt; ∞, exists for both negative and positive time. It is therefore:",
+  ["Causal","Anti-causal","Non-causal","Discrete-time"],2,
+  "Non-causal signals exist for both negative and positive values of time.",{t:T1}),
+Q("A real function x(t) is odd if:",
+  ["x(−t) = x(t)","x(−t) = −x(t)","x(t + T<sub>0</sub>) = x(t)","x(t) = 0 for t &lt; 0"],1,
+  "Odd symmetry: x(−t) = −x(t). Even symmetry is x(−t) = x(t).",{t:T1}),
+Q("A right-handed signal is one that:",
+  ["Is zero for all t less than some finite time t<sub>1</sub>","Is zero for all t greater than some finite time t<sub>2</sub>","Is nonzero only over a finite interval","Is nonzero for every real t"],0,
+  "Right-handed: the signal starts at some time t<sub>1</sub> and extends to the right. A left-handed signal is zero for t greater than some t<sub>2</sub>.",{t:T1}),
+Q("A signal that is nonzero over all real numbers is:",
+  ["A finite-length signal","An infinite-length signal","A left-handed signal","A random signal"],1,
+  "An infinite-length signal is nonzero over all real numbers; a finite-length signal is nonzero only over a finite interval.",{t:T1}),
+
+/* ---- Topic 2 (22) ---- */
+Q("A signal x(t) is periodic if, for some positive constant T<sub>0</sub>:",
+  ["x(t) = x(t + nT<sub>0</sub>) for all t","x(t) = −x(−t) for all t","x(t) = 0 for |t| &gt; T<sub>0</sub>","x(t) = x(−t) for all t"],0,
+  "Periodicity means x(t) = x(t + nT<sub>0</sub>) for all t. The smallest such T<sub>0</sub> is the fundamental period.",{t:T2}),
+Q("The fundamental period of x(t) = 10 sin(16πt) is:",
+  ["1/16 s","1/8 s","8 s","16π s"],1,
+  "T<sub>0</sub> = 2π/ω = 2π/16π = 1/8 s.",{t:T2}),
+Q("The fundamental period of x(t) = 8 sin 50t is:",
+  ["25π s","π/25 s","25/π s","50π s"],1,
+  "T<sub>0</sub> = 2π/50 = π/25 s. (25/π is the frequency in Hz.)",{t:T2}),
+Q("The fundamental period of x(t) = sin 8πt + sin 4πt is:",
+  ["1/4 s","1/2 s","1 s","2 s"],1,
+  "T<sub>1</sub> = 2π/8π = 1/4 s and T<sub>2</sub> = 2π/4π = 1/2 s. LCM(1/4, 1/2) = LCM(1, 1)/GCF(4, 2) = 1/2 s.",{t:T2}),
+Q("The fundamental period of x(t) = sin(πt/8) + sin(πt/4) is:",
+  ["8 s","16 s","24 s","32 s"],1,
+  "T<sub>1</sub> = 2π/(π/8) = 16 s and T<sub>2</sub> = 2π/(π/4) = 8 s. LCM(16, 8) = 16 s.",{t:T2}),
+Q("The fundamental period of a sum of sinusoids is found using the:",
+  ["Greatest common factor of the periods","Least common multiple of the periods","Sum of the periods","Product of the periods"],1,
+  "The LCM guarantees every component completes a whole number of cycles, so the total signal repeats: T<sub>0</sub> = LCM(T<sub>1</sub>, T<sub>2</sub>).",{t:T2}),
+Q("Two periods are T<sub>1</sub> = 2/3 s and T<sub>2</sub> = 4/5 s. Using LCM(numerators) ÷ GCF(denominators), their LCM is:",
+  ["4/15 s","4 s","2 s","8/3 s"],1,
+  "LCM(2, 4) = 4 and GCF(3, 5) = 1, so the LCM is 4 s. Check: 4 = 6(2/3) = 5(4/5).",{t:T2}),
+Q("The fundamental period of x(t) = 15 sin(5πt) cos(10πt) is:",
+  ["2/15 s","1/5 s","2/5 s","2 s"],2,
+  "sin u cos v = ½[sin(u+v) + sin(u−v)], so x(t) = 7.5[sin 15πt − sin 5πt]. The periods are 2/15 s and 2/5 s, and LCM = LCM(2, 2)/GCF(15, 5) = 2/5 s.",{t:T2}),
+Q("Which identity correctly converts sin u cos v into a sum?",
+  ["½[sin(u + v) + sin(u − v)]","½[cos(u − v) − cos(u + v)]","½[cos(u − v) + cos(u + v)]","½[sin(u + v) − sin(u − v)]"],0,
+  "sin u cos v = ½[sin(u+v) + sin(u−v)]. The second is sin u sin v, the third is cos u cos v, and the fourth is cos u sin v.",{t:T2}),
+Q("A signal with finite energy 0 ≤ E &lt; ∞ has an average power of:",
+  ["Infinite","Zero","Equal to E","Exactly 1 W"],1,
+  "Energy signals have finite energy and zero average power (P = 0).",{t:T2}),
+Q("The average power of a(t) = 3 sin(2πt), −∞ &lt; t &lt; ∞, is:",
+  ["9 W","9/2 W","3/√2 W","3 W"],1,
+  "Over one period (T = 1): P = ∫|3 sin 2πt|² dt = 9·½∫[1 − cos 4πt] dt = 9/2 W. Its energy is infinite, so it is a power signal.",{t:T2}),
+Q("b(t) = 5e<sup>−2|t|</sup>, −∞ &lt; t &lt; ∞, is best classified as:",
+  ["An energy signal with E = 12.5 J and P = 0","A power signal with E = ∞ and P = 12.5 W","An energy signal with E = 25 J and P = 0","Neither an energy nor a power signal"],0,
+  "E = ∫25e<sup>−4|t|</sup>dt = 2·(25/4) = 25/2 = 12.5 J (finite). Finite energy forces the average power to zero.",{t:T2}),
+Q("d(t) = 1/√t for t &gt; 1 and 0 for t ≤ 1 is:",
+  ["An energy signal","A power signal","Neither an energy nor a power signal","Periodic"],2,
+  "E = ∫<sub>1</sub><sup>∞</sup> (1/t) dt = ln t |<sub>1</sub><sup>∞</sup> = ∞, and P = lim (1/T) ln(T/2) = 0. Infinite energy and zero power: neither.",{t:T2}),
+Q("For a periodic signal with period T, the average power is computed as:",
+  ["(1/T) ∫ |x(t)|² dt over one period","∫ x(t) dt over one period","(1/T) ∫ x(t) dt over one period","∫ |x(t)|² dt from −∞ to ∞"],0,
+  "P = (1/T)∫<sub>t0</sub><sup>t0+T</sup>|x(t)|² dt. The last option is the energy integral.",{t:T2}),
+Q("The RMS value of a power signal is:",
+  ["Its average power P","√P","P²","Its energy E"],1,
+  "RMS is the square root of the average power.",{t:T2}),
+Q("Which statement is true?",
+  ["All periodic signals are power signals","All non-periodic signals are energy signals","A signal that decays to zero as t → ∞ is always an energy signal","A bounded, time-limited signal is always a power signal"],0,
+  "Periodic signals have finite average power and infinite energy. Decay to zero is usually but not always enough for finite energy (d(t) = 1/√t decays, yet E = ∞). Bounded, time-limited signals are energy signals.",{t:T2}),
+Q("A periodic signal g(t) has an average power of 5 W. The average power of 2g(t) is:",
+  ["10 W","20 W","25 W","5 W"],1,
+  "Scaling by c multiplies the power by c²: 2² × 5 = 20 W.",{t:T2}),
+Q("The RMS value of g(t) is 3. The RMS value of −2g(t) is:",
+  ["−6","1.5","6","36"],2,
+  "P<sub>g</sub> = 3² = 9, so P = (−2)²·9 = 36 W and RMS = √36 = 6. RMS is never negative, and 36 is the power, not the RMS.",{t:T2}),
+Q("g(t) is periodic with period 4 and g(t) = t³ for −2 &lt; t &lt; 2. Its average power is:",
+  ["64/7 W","128/7 W","32/7 W","16 W"],0,
+  "P = (1/4)∫<sub>−2</sub><sup>2</sup> t⁶ dt = (1/4)(2·2⁷/7) = (1/4)(256/7) = 64/7 ≈ 9.14 W.",{t:T2}),
+Q("The signal t² sin t is:",
+  ["Even","Odd","Neither even nor odd","Both even and odd"],1,
+  "Even × odd = odd (t² is even, sin t is odd).",{t:T2}),
+Q("The even component of x(t) = e<sup>−at</sup>u(t), a &gt; 0, is:",
+  ["e<sup>−a|t|</sup>","½ e<sup>−a|t|</sup>","½[e<sup>−at</sup>u(t) − e<sup>at</sup>u(−t)]","e<sup>−at</sup>u(t)"],1,
+  "x<sub>e</sub>(t) = ½[x(t) + x(−t)] = ½[e<sup>−at</sup>u(t) + e<sup>at</sup>u(−t)] = ½ e<sup>−a|t|</sup>. The third option is the odd component.",{t:T2}),
+Q("The odd component of x(t) = sin(2πt) + cos(4πt) is:",
+  ["cos(4πt)","sin(2πt)","0","sin(2πt) + cos(4πt)"],1,
+  "sin is odd and cos is even. x<sub>o</sub>(t) = ½[x(t) − x(−t)] = sin(2πt).",{t:T2}),
+
+/* ---- Topic 3 (18) ---- */
+Q("The line through (1, 2) and (3, 8) is:",
+  ["y = 3x − 1","y = 3x + 1","y = 2x","y = 4x − 2"],0,
+  "Slope = (8 − 2)/(3 − 1) = 3. Two-point form: y − 2 = 3(x − 1), so y = 3x − 1.",{t:T3}),
+Q("A triangular pulse x(t) has vertices (−1, 0), (0, 3) and (1, 0). On 0 ≤ t ≤ 1 it is described by:",
+  ["x(t) = 3t + 3","x(t) = −3t + 3","x(t) = 3t − 3","x(t) = −3t − 3"],1,
+  "The slope from (0, 3) to (1, 0) is −3 and the intercept is 3. (The rising side, 3t + 3, covers −1 ≤ t ≤ 0.)",{t:T3}),
+Q("y(t) = x(t + 2) shifts x(t):",
+  ["2 units to the left (advance)","2 units to the right (delay)","By compressing it by 2","By reflecting it about t = 0"],0,
+  "x(t + T) with T &gt; 0 advances the signal (shifts it left). Use t − T to delay it.",{t:T3}),
+Q("The triangular pulse has its peak of 3 at t = 0 and is zero at t = ±1. Where is the peak of x(t − 1)?",
+  ["t = −1","t = 0","t = 1","t = 2"],2,
+  "x(t − 1) delays the signal by 1, so the peak moves from t = 0 to t = 1 and the pulse spans 0 ≤ t ≤ 2.",{t:T3}),
+Q("For the same triangular pulse, x(t + 1) on −1 ≤ t ≤ 0 is:",
+  ["−3t + 6","−3t","3t + 6","−3t + 3"],1,
+  "Substitute t → t + 1 in the piece −3t + 3: −3(t + 1) + 3 = −3t. The domain 0 ≤ t + 1 ≤ 1 becomes −1 ≤ t ≤ 0.",{t:T3}),
+Q("In y(t) = x(αt), if α &gt; 1 the signal is:",
+  ["Expanded by a factor of α","Compressed by a factor of α","Delayed by α","Reflected about t = 0"],1,
+  "α &gt; 1 compresses the signal; 0 &lt; α &lt; 1 expands it.",{t:T3}),
+Q("x(t) is nonzero only for −1 ≤ t ≤ 1. Then x(½t) is nonzero for:",
+  ["−½ ≤ t ≤ ½","−2 ≤ t ≤ 2","−1 ≤ t ≤ 1","0 ≤ t ≤ 2"],1,
+  "Need −1 ≤ ½t ≤ 1, so −2 ≤ t ≤ 2: the signal is expanded by 2.",{t:T3}),
+Q("x(t) is nonzero only for −1 ≤ t ≤ 1. Then x(2t) is nonzero for:",
+  ["−½ ≤ t ≤ ½","−2 ≤ t ≤ 2","−1 ≤ t ≤ 1","0 ≤ t ≤ 2"],0,
+  "Need −1 ≤ 2t ≤ 1, so −½ ≤ t ≤ ½: the signal is compressed by 2.",{t:T3}),
+Q("Time inversion, y(t) = x(−t), reflects the signal about:",
+  ["The vertical axis (t = 0)","The horizontal axis","The line y = t","The point (1, 1)"],0,
+  "x(−t) is the mirror image of x(t) about the vertical axis. Flipping about the horizontal axis would be −x(t).",{t:T3}),
+Q("x(t) has its peak value of 1 at t = −½. Where does x(−t) have its peak?",
+  ["t = −½","t = ½","t = 1","t = −1"],1,
+  "Inversion sends every feature at t = a to t = −a, so the peak moves to t = ½.",{t:T3}),
+Q("Substituting t → −t in the domain −1 ≤ t ≤ 0 gives:",
+  ["−1 ≤ t ≤ 0","0 ≤ t ≤ 1","1 ≤ t ≤ 0","0 ≤ t ≤ −1"],1,
+  "−1 ≤ −t ≤ 0. Dividing all sides by −1 reverses the inequalities: 1 ≥ t ≥ 0, i.e., 0 ≤ t ≤ 1.",{t:T3}),
+Q("For x(αt + β), the recommended order of operations is:",
+  ["Shifting, inversion, scaling","Scaling, inversion (if α &lt; 0), shifting","Inversion, shifting, scaling","Shifting, scaling, inversion"],1,
+  "Write it as x(α(t + β/α)), then scale by |α|, invert if α is negative, and finally shift.",{t:T3}),
+Q("x(−½t + ½) can be written x(−½(t − 1)). This means:",
+  ["Expand by 2, invert, delay by 1","Compress by 2, invert, advance by 1","Expand by 2, invert, advance by 1","Compress by 2, invert, delay by ½"],0,
+  "|α| = ½ &lt; 1 expands by 2, the negative sign inverts, and (t − 1) delays by 1.",{t:T3}),
+Q("x(t) rises linearly from 0 at t = −2 to a peak of 2 at t = 0, falls linearly to 1 at t = 1, stays at 1 until t = 2, then drops to 0. x(−t + 3) is nonzero on:",
+  ["−5 ≤ t ≤ −1","1 ≤ t ≤ 5","−2 ≤ t ≤ 2","3 ≤ t ≤ 7"],1,
+  "Need −2 ≤ −t + 3 ≤ 2, so −5 ≤ −t ≤ −1, so 1 ≤ t ≤ 5 (the inequality flips when dividing by −1).",{t:T3}),
+Q("Using the same x(t), the peak value 2 of x(6 − 3t) occurs at:",
+  ["t = 0","t = 2","t = 3","t = 6"],1,
+  "The peak of x is at 0, so set 6 − 3t = 0, giving t = 2.",{t:T3}),
+Q("6 − 3t = −3(t − 2). So x(6 − 3t) is x(t) after:",
+  ["Compression by 3, inversion, delay by 2","Expansion by 3, inversion, delay by 2","Compression by 3, inversion, advance by 2","Compression by 3, inversion, delay by 6"],0,
+  "|α| = 3 &gt; 1 compresses by 3, the negative sign inverts, and (t − 2) delays by 2.",{t:T3}),
+Q("The triangular pulse is 3t + 3 on −1 ≤ t ≤ 0 and −3t + 3 on 0 ≤ t ≤ 1. Then x(2t) on 0 ≤ t ≤ ½ is:",
+  ["−3t + 3","−6t + 3","−6t + 6","−3t/2 + 3"],1,
+  "Replace t by 2t: −3(2t) + 3 = −6t + 3, and 0 ≤ 2t ≤ 1 becomes 0 ≤ t ≤ ½.",{t:T3}),
+Q("With the same triangular pulse, x(−t + 1) on 0 ≤ t ≤ 1 is:",
+  ["3t","−3t + 3","3t + 3","−3t"],0,
+  "Use the piece −3u + 3 (for 0 ≤ u ≤ 1) with u = −t + 1: −3(−t + 1) + 3 = 3t, valid when 0 ≤ −t + 1 ≤ 1, i.e., 0 ≤ t ≤ 1.",{t:T3})
+];
+
+/* ---------- Quiz 3: MATLAB and Signal Processing Onramp (50 items) ---------- */
+const M1="MATLAB Onramp", M2="Signal Processing Onramp";
+const C=s=>"<code>"+s+"</code>";
+const MQ = [
+/* ---- MATLAB Onramp (30) ---- */
+Q("Which statement creates a variable named x and assigns it the value of pi?",
+  [C("x = pi"),C("x == pi"),C("x := pi"),C("pi -&gt; x")],0,
+  "Variables are created with the equal sign: the left side is the variable name and the right side is its value. <code>==</code> compares two values instead of assigning.",{t:M1}),
+Q("How do you provide inputs to a function such as sin in MATLAB?",
+  ["Inside parentheses, e.g., "+C("sin(-5)"),"Inside square brackets, e.g., "+C("sin[-5]"),"Inside curly braces, e.g., "+C("sin{-5}"),"After a colon, e.g., "+C("sin:-5")],0,
+  "Function inputs go inside parentheses: <code>y = sin(-5)</code>.",{t:M1}),
+Q("Which command saves your current workspace to a MAT-file?",
+  [C("save data.mat"),C("load data.mat"),C("clear data.mat"),C("format data.mat")],0,
+  "<code>save</code> writes the workspace to a MAT-file. <code>load</code> reads variables from one back into the workspace.",{t:M1}),
+Q("Which command clears all text from the Command Window?",
+  [C("clc"),C("clear"),C("format long"),C("load")],0,
+  "<code>clc</code> clears the text in the Command Window. <code>clear</code> removes all variables from the workspace instead.",{t:M1}),
+Q("What does "+C("format long")+" do?",
+  ["Changes how numeric output appears in the Command Window","Makes a script run for a longer time","Saves variables with extra precision to a MAT-file","Clears all variables from the workspace"],0,
+  "<code>format</code> only changes how numbers are displayed in the Command Window (for example, more digits with <code>long</code>). It does not change the stored values.",{t:M1}),
+Q("Which of these is a row vector?",
+  [C("[3 5]"),C("[1;3]"),C("4"),C("[3 4 5; 6 7 8]")],0,
+  "Spaces (or commas) separate columns, so <code>[3 5]</code> is one row with two columns. <code>[1;3]</code> is a column vector, <code>4</code> is a scalar, and the last one is a 2-by-3 matrix.",{t:M1}),
+Q("The array "+C("[1;3]")+" is a:",
+  ["Scalar","Row vector","Column vector","2-by-2 matrix"],2,
+  "A semicolon starts a new row, so <code>[1;3]</code> has 2 rows and 1 column: a column vector.",{t:M1}),
+Q("How many elements does the vector "+C("1:0.5:4")+" contain?",
+  ["3","6","7","8"],2,
+  "The colon operator is start:step:stop, so it gives 1, 1.5, 2, 2.5, 3, 3.5, 4, which is 7 elements.",{t:M1}),
+Q(C("linspace(1,10,5)")+" returns:",
+  [C("1 3.25 5.5 7.75 10"),C("1 3 5 7 9"),C("1 2.5 5 7.5 10"),C("1 2.25 4.5 6.75 9")],0,
+  "<code>linspace(a,b,n)</code> gives n evenly spaced values from a to b (both included). The spacing is (10 − 1)/(5 − 1) = 2.25.",{t:M1}),
+Q("Create a row vector where the elements are equally spaced by 4 units from 0 to 20.",
+  [C("0:4:20"),C("linspace(0,20,4)"),C("linspace(0,4,20)"),C("0:20:4")],0,
+  "Use start:step:stop, so <code>0:4:20</code> gives 0 4 8 12 16 20. <code>linspace(0,20,4)</code> gives only 4 points, spaced about 6.67 apart.",{t:M1}),
+Q(C("ones(2,3)")+" creates:",
+  ["A matrix with 2 rows and 3 columns of 1s","A matrix with 3 rows and 2 columns of 1s","A 2-element row vector, [2 3]","A matrix with 2 rows and 3 columns of 0s"],0,
+  "The inputs are rows then columns, so <code>ones(2,3)</code> is a 2-by-3 matrix of ones. <code>zeros(2,3)</code> would make the same shape of 0s.",{t:M1}),
+Q("For a matrix A, which expression accesses the element in the second column of the last row?",
+  [C("A(end,2)"),C("A(2,end)"),C("A(2,:)"),C("A(:,2)")],0,
+  "Indexing is A(row, column). <code>end</code> in the row position means the last row, and 2 picks the second column.",{t:M1}),
+Q("For a matrix A, what does "+C("A(2,:)")+" access?",
+  ["The entire second row","The entire second column","Only the second element","All rows of the first two columns"],0,
+  "A colon by itself means \"all\". With row 2 and all columns, you get the entire second row.",{t:M1}),
+Q("For a matrix A, what does "+C("A(1:3,:)")+" access?",
+  ["All columns of the first three rows","All rows of the first three columns","The first three elements of the first row","Only the element in row 1, column 3"],0,
+  "<code>1:3</code> in the row position selects rows 1 to 3, and <code>:</code> selects every column.",{t:M1}),
+Q("If "+C("A = [10 20 30];")+" then after "+C("A(2) = 11")+" the array A is:",
+  [C("10 11 30"),C("11 20 30"),C("10 20 11"),C("10 20 30 11")],0,
+  "Assigning to <code>A(2)</code> replaces the second element only.",{t:M1}),
+Q(C("[1 2; 3 4] + 1")+" returns:",
+  [C("[2 3; 4 5]"),C("[2 2; 4 4]"),C("[1 2; 3 5]"),C("[2 3; 3 4]")],0,
+  "Adding a scalar to an array adds it to every element: [1+1 2+1; 3+1 4+1].",{t:M1}),
+Q(C("[1 1; 1 1]*[2 2; 2 2]")+" returns:",
+  [C("[4 4; 4 4]"),C("[2 2; 2 2]"),C("[8 8; 8 8]"),C("[3 3; 3 3]")],0,
+  "<code>*</code> is matrix multiplication: each entry is (row of the first) · (column of the second) = 1·2 + 1·2 = 4.",{t:M1}),
+Q(C("[1 1; 1 1].*[2 2; 2 2]")+" returns:",
+  [C("[2 2; 2 2]"),C("[4 4; 4 4]"),C("[1 1; 1 1]"),C("[3 3; 3 3]")],0,
+  "<code>.*</code> is element-wise multiplication: each element is multiplied by the matching element, 1·2 = 2.",{t:M1}),
+Q("Which command saves the number of rows and the number of columns of x into two different variables?",
+  [C("[xrow,xcol] = size(x)"),C("xrow,xcol = size(x)"),C("[xrow;xcol] = length(x)"),C("size(x) = [xrow,xcol]")],0,
+  "Use square brackets on the left to collect multiple outputs: <code>[xrow,xcol] = size(x)</code>.",{t:M1}),
+Q("If "+C("x = [4 9 2];")+" what are xMax and idx after "+C("[xMax,idx] = max(x)")+"?",
+  ["xMax = 9, idx = 2","xMax = 9, idx = 9","xMax = 2, idx = 3","xMax = 4, idx = 1"],0,
+  "<code>max</code> returns the largest value (9) and its index, the position where it occurs (2).",{t:M1}),
+Q("Which command opens the documentation page for the function randi?",
+  [C("doc randi"),C("open randi"),C("show randi"),C("randi doc")],0,
+  "<code>doc</code> followed by a function name opens its documentation page.",{t:M1}),
+Q(C("plot(x,y,&quot;ro--&quot;,LineWidth=5)")+" draws:",
+  ["A red dashed line with circle markers and a heavy line width","A red dotted line with circle markers and a heavy line width","A red dashed line with square markers and a heavy line width","A blue dashed line with circle markers and a heavy line width"],0,
+  "In the format string, <code>r</code> is red, <code>o</code> is a circle marker and <code>--</code> is a dashed line. <code>LineWidth=5</code> makes the line heavy.",{t:M1}),
+Q("Which command makes the next plotted line appear on the existing axes instead of replacing the plot?",
+  [C("hold on"),C("hold off"),C("legend"),C("clc")],0,
+  "<code>hold on</code> keeps the existing plot. <code>hold off</code> creates new axes for the next line.",{t:M1}),
+Q("Which commands add labels to the x-axis and y-axis of a plot?",
+  [C("xlabel(&quot;x&quot;)")+" and "+C("ylabel(&quot;y&quot;)"),C("title(&quot;My Title&quot;)"),C("legend(&quot;a&quot;,&quot;b&quot;,&quot;c&quot;)"),C("hold on")],0,
+  "<code>xlabel</code> and <code>ylabel</code> label the axes. <code>title</code> adds a title and <code>legend</code> names the plotted lines.",{t:M1}),
+Q("A table named data has a variable HeightYards. Which line derives a new variable HeightMeters (1 yard = 0.9144 m)?",
+  [C("data.HeightMeters = data.HeightYards*0.9144"),C("data(HeightMeters) = HeightYards*0.9144"),C("HeightMeters = data*0.9144.HeightYards"),C("data.HeightYards = HeightMeters*0.9144")],0,
+  "Use dot notation to extract a table variable (<code>data.HeightYards</code>), and assigning to a new name (<code>data.HeightMeters</code>) creates a new variable.",{t:M1}),
+Q(C("[5 10 15] > 12")+" returns:",
+  [C("0 0 1"),C("0 1 1"),C("1 1 0"),C("15")],0,
+  "The comparison is done element by element and returns logical values. Only 15 is greater than 12.",{t:M1}),
+Q("If "+C("v1 = [3 8 6 10];")+" then "+C("v1(v1 &gt; 6)")+" returns:",
+  [C("8 10"),C("3 6"),C("0 1 0 1"),C("6 8 10")],0,
+  "Logical indexing extracts the elements where the condition is true. 8 and 10 are greater than 6; 6 itself is not.",{t:M1}),
+Q("If "+C("x = [5 999 7 999];")+" then after "+C("x(x==999) = 1")+" the array x is:",
+  [C("5 1 7 1"),C("5 999 7 1"),C("1 1 1 1"),C("5 7")],0,
+  "Every element equal to 999 is replaced with 1; the others are unchanged.",{t:M1}),
+Q("What value does y have after this code runs?<pre class=\"code\">x = 0.7;\nif x &gt; 0.5\n    y = 3\nelse\n    y = 4\nend</pre>",
+  [C("y = 3"),C("y = 4"),C("y = 0.7"),"An error"],0,
+  "0.7 &gt; 0.5 is true, so the <code>if</code> branch runs and y is set to 3.",{t:M1}),
+Q("What does this code display?<pre class=\"code\">for c = 2:2:6\n    disp(c)\nend</pre>",
+  ["2, then 4, then 6","1, then 2, then 3","2, then 6","Only 6"],0,
+  "The loop counter c takes each value in <code>2:2:6</code> (2, 4, 6), and the loop body displays it each time.",{t:M1}),
+
+/* ---- Signal Processing Onramp (20) ---- */
+Q("In the Signal Processing Onramp workflow, what comes right after preprocessing the signals in the time domain?",
+  ["Looking at the power spectrum in the frequency domain","Filtering the signals","Importing the signals","Deploying the algorithm to hardware"],0,
+  "The workflow is: import signals, preprocess in the time domain, analyze the spectrum, filter, then extract information or deploy. You can revisit earlier steps to refine your algorithm.",{t:M2}),
+Q("Why do you filter signals in the workflow?",
+  ["To keep only the relevant frequency content","To import them into MATLAB","To increase the sample rate","To convert them into tables"],0,
+  "Filtering keeps only the frequency content you care about, based on what you saw in the spectrum.",{t:M2}),
+Q("Which function imports signals from files into the MATLAB workspace in the onramp?",
+  [C("readmatrix"),C("pspectrum"),C("resample"),C("alignsignals")],0,
+  "<code>readmatrix</code> reads numeric data from a file into the workspace. The others analyze or modify a signal that is already loaded.",{t:M2}),
+Q("In Signal Analyzer, how do you set the time information (such as the sample rate) for each signal?",
+  ["With Time Values","With the Spectrum tab","With Accept All","With the checkboxes in the Filter Signals pane"],0,
+  "After importing, use <strong>Time Values</strong> to tell Signal Analyzer each signal's sample rate and start time. The checkboxes only show or hide signals.",{t:M2}),
+Q("Which Signal Analyzer tab do you use to view a signal in the time domain, frequency domain, or time-frequency domain?",
+  ["Display","Analyzer","Preprocess","Measurements"],0,
+  "The <strong>Display</strong> tab has the Time, Spectrum and Time-Frequency views.",{t:M2}),
+Q("Why should you duplicate signals before preprocessing them?",
+  ["So you can compare the signals before and after applying techniques","Because preprocessing only works on copies","To double the sample rate","To remove noise automatically"],0,
+  "Duplicating keeps the original, so you can compare before and after.",{t:M2}),
+Q("In preprocessing mode, after setting the Function Parameters and clicking Apply, what do you click to leave preprocessing mode and keep the results?",
+  ["Accept All","Restore Defaults","Help","Apply again"],0,
+  "<strong>Accept All</strong> leaves preprocessing mode and keeps the processed signals. <strong>Restore Defaults</strong> only resets the parameter values.",{t:M2}),
+Q("The sample rate of a signal is:",
+  ["The number of samples generated per second","The total number of samples in the signal","The highest frequency in the signal","The duration of the signal in seconds"],0,
+  "A sample rate of fs means fs samples are generated each second, so the spacing between points is 1/fs.",{t:M2}),
+Q("With "+C("fs = 100;")+" how many elements are in "+C("t = 0:1/fs:1;")+"?",
+  ["101","100","99","1"],0,
+  "The spacing is 1/fs = 0.01 s. Going from 0 to 1 in steps of 0.01 gives 100 steps and 101 points, because both endpoints are included.",{t:M2}),
+Q("In "+C("sig = sin(2*pi*f*t);")+" changing the value of f changes the signal's:",
+  ["Frequency","Amplitude","Sample rate","Noise level"],0,
+  "f is the frequency in Hz, so a sine of <code>2*pi*f*t</code> completes f cycles per second.",{t:M2}),
+Q(C("noise = 0.1*randn(size(sig));")+" creates:",
+  ["A vector of random numbers the same size as sig, scaled by 0.1","A vector of 0.1s the same size as sig","A sine wave with an amplitude of 0.1","A filtered version of sig"],0,
+  "<code>randn(size(sig))</code> makes random numbers matching sig's size, and multiplying by 0.1 controls how strong the noise is. Adding it to sig gives a more realistic noisy signal.",{t:M2}),
+Q("Which command displays the power spectrum of sig?",
+  [C("pspectrum(sig)"),C("cwt(sig)"),C("resample(sig)"),C("lowpass(sig)")],0,
+  "<code>pspectrum(sig)</code> plots the power spectrum (power in dB versus frequency).",{t:M2}),
+Q("Which command displays the spectrogram of sig?",
+  [C("pspectrum(sig,&quot;spectrogram&quot;)"),C("pspectrum(sig)"),C("cwt(sig,fs)"),C("alignsignals(sig)")],0,
+  "Adding the <code>\"spectrogram\"</code> option to <code>pspectrum</code> displays the time-frequency spectrogram.",{t:M2}),
+Q(C("cwt(sig,fs)")+" displays the continuous wavelet transform. Which toolbox does it require?",
+  ["Wavelet Toolbox","Statistics and Machine Learning Toolbox","Image Processing Toolbox","Optimization Toolbox"],0,
+  "<code>cwt</code> requires the Wavelet Toolbox and produces a scalogram.",{t:M2}),
+Q("Which command lowpass filters sig?",
+  [C("lowpass(sig,10)"),C("bandpass(sig,10)"),C("pspectrum(sig,10)"),C("resample(sig,10)")],0,
+  "<code>lowpass(sig,10)</code> keeps the low frequencies and removes the higher ones.",{t:M2}),
+Q("Which command keeps only frequency content between 8 and 12?",
+  [C("bandpass(sig,[8 12])"),C("lowpass(sig,[8 12])"),C("lowpass(sig,8,12)"),C("pspectrum(sig,[8 12])")],0,
+  "A bandpass filter passes a band of frequencies, given as <code>[lower upper]</code>.",{t:M2}),
+Q("Which command lowpass filters sig with a modified steepness of 0.95?",
+  [C("lowpass(sig,10,&quot;Steepness&quot;,0.95)"),C("lowpass(sig,0.95)"),C("lowpass(sig,10,0.95)"),C("bandpass(sig,10,&quot;Steepness&quot;,0.95)")],0,
+  "Optional filter settings are given as name-value pairs after the passband frequency: <code>\"Steepness\",0.95</code>.",{t:M2}),
+Q("A signal sampled at 100 Hz is processed with "+C("sig = resample(sig,3,2);")+". The new sample rate is:",
+  ["150 Hz","66.7 Hz","300 Hz","200 Hz"],0,
+  "<code>resample(sig,p,q)</code> resamples at p/q times the original rate: 100 × 3/2 = 150 Hz.",{t:M2}),
+Q("Which function aligns two signals by delaying the earliest signal?",
+  [C("alignsignals"),C("resample"),C("pspectrum"),C("cwt")],0,
+  "<code>[xa,ya] = alignsignals(x,y)</code> delays whichever signal starts earliest so that the two line up.",{t:M2}),
+Q("Which plot shows how a signal's frequency content changes over time?",
+  ["Spectrogram","Time-domain plot","Frequency-domain power spectrum","Amplitude histogram"],0,
+  "A time-domain plot shows amplitude versus time and the power spectrum shows power versus frequency. A spectrogram (or scalogram) shows frequency content across time.",{t:M2})
+];
+
+/* Spread the correct answers evenly over a–d (fixed seeds, so the order is stable). */
+function balance(arr,seed){
+  let s=seed;
+  const rnd=()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  let targets=[];for(let i=0;i<arr.length;i++)targets.push(i%4);
+  targets=sh(targets);
+  arr.forEach((q,i)=>{
+    const correct=q.o[q.a];
+    const others=sh(q.o.filter((_,k)=>k!==q.a));
+    const o=[];let oi=0;
+    for(let k=0;k<4;k++)o.push(k===targets[i]?correct:others[oi++]);
+    q.o=o;q.a=targets[i];
+  });
+}
+balance(TQ,20260920);
+balance(MQ,20260921);
+
+const QUIZZES = {
+  long:{id:"long", title:"Long Quiz 1", blurb:"40 items, 50 points. Same questions as your scanned exam, with answer choices kept in a–d order.", questions:LQ, fixed:true},
+  topics:{id:"topics", title:"Topics 1 to 3 practice", blurb:"60 items from the slides: introduction to signals, periodicity/energy/power/even-odd, and signal operations.", questions:TQ, fixed:false},
+  matlab:{id:"matlab", title:"MATLAB and Signal Processing Onramp", blurb:"50 items from the two Onramp quick references: MATLAB basics (30) and the signal processing workflow (20).", questions:MQ, fixed:false}
+};
+
+/* ---------- State + helpers ---------- */
+const app = document.getElementById("app");
+const LET = ["a","b","c","d"];
+let settings = {shuffleQ:false, shuffleO:false};
+let S = null;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function getBest(id){try{return JSON.parse(localStorage.getItem("sigquiz-best-"+id));}catch(e){return null;}}
+function saveBest(id,obj){try{const b=getBest(id);if(!b||obj.pct>b.pct)localStorage.setItem("sigquiz-best-"+id,JSON.stringify(obj));}catch(e){}}
+function totalPts(quiz){return quiz.questions.reduce((s,q)=>s+(q.pts||1),0);}
+
+function tracePath(){
+  let d="";const W=600,H=34,cycles=6,N=300;
+  for(let i=0;i<=N;i++){const x=i/N*W;const y=H/2-Math.sin(i/N*cycles*2*Math.PI)*12;d+=(i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)+" ";}
+  return d;
+}
+const TRACE_D = tracePath();
+function traceSVG(prev){
+  return '<svg class="trace" viewBox="0 0 600 34" preserveAspectRatio="none" aria-hidden="true">'
+    +'<path class="ghost" d="'+TRACE_D+'" fill="none" stroke-width="2" vector-effect="non-scaling-stroke"/>'
+    +'<path class="live" id="live" pathLength="1" d="'+TRACE_D+'" fill="none" stroke-width="2.6" stroke-linecap="round" vector-effect="non-scaling-stroke" style="stroke-dashoffset:'+(1-prev)+'"/></svg>';
+}
+
+/* ---------- Home ---------- */
+function home(){
+  S=null;
+  const cards = Object.values(QUIZZES).map(q=>{
+    const b=getBest(q.id);
+    const best=b?'<div class="best">Best so far: '+b.correct+' / '+b.total+' correct'+(b.pts!=null?' ('+b.pts+' / '+b.ptsTotal+' pts)':'')+'</div>':'';
+    return '<button class="choice" data-start="'+q.id+'"><h2>'+q.title+'</h2><p>'+q.blurb+'</p>'+best+'</button>';
+  }).join("");
+  app.innerHTML =
+    '<header class="hero"><h1>Signals, Spectra &amp; Signal Processing</h1><p>ECE a313 review quizzes. Answer each question, see right away whether you got it, and read why.</p></header>'
+    + cards
+    + '<section class="settings"><h3>Options</h3>'
+    + '<label><input type="checkbox" id="shQ"'+(settings.shuffleQ?' checked':'')+'><span>Shuffle question order</span></label>'
+    + '<label><input type="checkbox" id="shO"'+(settings.shuffleO?' checked':'')+'><span>Shuffle answer choices<small>Topics quiz only. Long Quiz 1 keeps the exam\'s a–d order because some choices say \"Both a and b\".</small></span></label>'
+    + '</section>';
+}
+
+/* ---------- Quiz flow ---------- */
+function start(id, subset){
+  const quiz=QUIZZES[id];
+  let idxs = subset ? subset.slice() : quiz.questions.map((_,i)=>i);
+  if(settings.shuffleQ) idxs=shuffle(idxs);
+  const optOrders={};
+  idxs.forEach(i=>{
+    const q=quiz.questions[i];
+    optOrders[i]=(settings.shuffleO && !quiz.fixed && !q.fixed)?shuffle([0,1,2,3]):[0,1,2,3];
+  });
+  S={id:id,quiz:quiz,idxs:idxs,optOrders:optOrders,pos:0,answers:{},full:!subset,done:false};
+  renderQ(false);
+  window.scrollTo(0,0);
+}
+
+function runningScore(){
+  let c=0,n=0;S.idxs.forEach(i=>{if(S.answers[i]!==undefined){n++;if(S.answers[i]===S.quiz.questions[i].a)c++;}});
+  return {c:c,n:n};
+}
+
+function renderQ(justAnswered){
+  const qi=S.idxs[S.pos], q=S.quiz.questions[qi], total=S.idxs.length;
+  const answered=S.answers[qi]!==undefined;
+  const order=S.optOrders[qi];
+  const rs=runningScore();
+  const ac=rs.n;
+  const from=(justAnswered?ac-1:ac)/total, to=ac/total;
+
+  let opts="";
+  order.forEach((orig,d)=>{
+    let cls="opt", chip=LET[d];
+    if(answered){
+      if(orig===q.a){cls+=" correct";chip="✓";}
+      else if(orig===S.answers[qi]){cls+=" wrong";chip="✗";}
+      else cls+=" dim";
+    }
+    opts+='<button class="'+cls+'" data-pick="'+d+'"'+(answered?' disabled':'')+'><span class="chip">'+chip+'</span><span class="txt">'+q.o[orig]+'</span></button>';
+  });
+
+  let fb="";
+  if(answered){
+    const ok=S.answers[qi]===q.a;
+    fb='<div class="fb '+(ok?'ok':'no')+'" role="status"><strong>'+(ok?'Correct.':'Not quite.')+'</strong><p>'+q.exp+'</p></div>'
+      +(q.note?'<div class="note"><b>Heads up:</b> '+q.note+'</div>':'');
+  }
+
+  const meta='<div class="qmeta"><span>Question '+(S.pos+1)+' of '+total+'</span>'
+    +(q.t?'<span>'+q.t+'</span>':'')+(q.pts?'<span class="pill">'+q.pts+' pts</span>':'')+'</div>';
+
+  const cells=S.idxs.map((i,k)=>{
+    const a=S.answers[i];let c="cell",lab="unanswered";
+    if(a!==undefined){if(a===S.quiz.questions[i].a){c+=" ok";lab="correct";}else{c+=" no";lab="incorrect";}}
+    if(k===S.pos)c+=" cur";
+    return '<button class="'+c+'" data-go="'+k+'" aria-label="Question '+(k+1)+', '+lab+'">'+(k+1)+'</button>';
+  }).join("");
+  const grid='<details class="jump" id="jump"'+(S.gridOpen?' open':'')+'><summary>Jump to a question ('+ac+' of '+total+' answered)</summary>'
+    +'<div class="grid">'+cells+'</div><p class="legend">Green: correct. Red: incorrect. Blank: not answered yet. The outlined number is where you are.</p></details>';
+
+  let confirmBar="";
+  if(S.confirmFinish){
+    const un=total-ac;
+    confirmBar='<div class="note confirm" role="alert"><b>'+un+(un===1?' question is':' questions are')+' still unanswered.</b> Unanswered items count as missed. Finish anyway?'
+      +'<div class="actions"><button class="btn" id="finishnow">Finish anyway</button><button class="btn ghost" id="keepgoing">Keep answering</button></div></div>';
+  }
+
+  app.innerHTML =
+    '<div class="bar"><button class="linkbtn" id="exit">← All quizzes</button><span class="count">'+rs.c+' correct of '+rs.n+' answered</span></div>'
+    + confirmBar
+    +'<p class="quizname">'+S.quiz.title+(S.full?'':' (retrying missed items)')+'</p>'
+    + traceSVG(from)
+    + '<article class="card">'+meta+'<h2 class="qtext" id="qtext" tabindex="-1">'+q.q+'</h2>'+(q.fig?FIGS[q.fig]:'')
+    + '<div class="opts">'+opts+'</div>'+fb+'</article>'
+    + '<div class="nav"><button class="btn ghost" id="prev"'+(S.pos===0?' disabled':'')+'>← Previous</button>'
+    + '<button class="btn" id="next">'+(S.pos<total-1?'Next →':'Finish quiz')+'</button></div>'
+    + grid
+    + '<p class="hint">Answer in any order. Keys: 1–4 or a–d to answer, ← → to move between questions. <button class="linkbtn" id="finish">Finish and see results</button></p>';
+
+  if(justAnswered){
+    const el=document.getElementById("live");
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.strokeDashoffset=String(1-to);}));
+    const nb=document.getElementById("next"); if(nb) nb.focus({preventScroll:true});
+  } else if(!S.confirmFinish){
+    document.getElementById("qtext").focus({preventScroll:true});
+  }
+}
+
+function pick(d){
+  if(!S||S.done)return;
+  const qi=S.idxs[S.pos];
+  if(S.answers[qi]!==undefined)return;
+  const orig=S.optOrders[qi][d];
+  if(orig===undefined)return;
+  S.answers[qi]=orig;
+  S.confirmFinish=false;
+  renderQ(true);
+}
+
+function goTo(k){
+  if(!S||S.done||k<0||k>=S.idxs.length)return;
+  S.pos=k;S.confirmFinish=false;
+  renderQ(false);window.scrollTo(0,0);
+}
+function next(){ if(S.pos<S.idxs.length-1)goTo(S.pos+1); else tryFinish(); }
+function prev(){ goTo(S.pos-1); }
+function tryFinish(){
+  const un=S.idxs.length-runningScore().n;
+  if(un>0){S.confirmFinish=true;renderQ(false);window.scrollTo(0,0);}
+  else results();
+}
+
+/* ---------- Results ---------- */
+function results(){
+  S.done=true;S.confirmFinish=false;
+  const quiz=S.quiz;let correct=0,pts=0,ptsTotal=0,skipped=0;const missed=[],byTopic={};
+  S.idxs.forEach(i=>{
+    const q=quiz.questions[i],p=q.pts||1,a=S.answers[i],ok=a===q.a;
+    ptsTotal+=p;if(a===undefined)skipped++;
+    if(ok){correct++;pts+=p;}else missed.push(i);
+    if(q.t){const t=byTopic[q.t]=byTopic[q.t]||{c:0,n:0};t.n++;if(ok)t.c++;}
+  });
+  const total=S.idxs.length,pct=Math.round(correct/total*100);
+  const hasPts=quiz.questions.some(q=>q.pts);
+  if(S.full)saveBest(quiz.id,{correct:correct,total:total,pct:pct,pts:hasPts?pts:null,ptsTotal:ptsTotal});
+
+  const msg=pct>=90?"Excellent. You know this material.":pct>=75?"Solid. Review the misses below and you're there.":pct>=50?"Getting there. The explanations below target what to fix.":"Worth another pass through the slides, then retry the missed items.";
+
+  let topics="";
+  const keys=Object.keys(byTopic);
+  if(keys.length>1){
+    topics='<div class="topics">'+keys.map(k=>{const t=byTopic[k];return '<div class="trow"><span>'+k+'</span><span>'+t.c+' / '+t.n+'</span><div class="tbar"><i style="width:'+Math.round(t.c/t.n*100)+'%"></i></div></div>';}).join("")+'</div>';
+  }
+
+  function item(i){
+    const q=quiz.questions[i],a=S.answers[i],ok=a===q.a;
+    const mine=a===undefined?'<span class="bad">Not answered</span>':'<span class="'+(ok?'good':'bad')+'">'+q.o[a]+'</span>';
+    return '<div class="rev"><p class="q">'+q.q+'</p>'
+      +'<p class="ln"><b>Your answer:</b> '+mine+'</p>'
+      +(ok?'':'<p class="ln"><b>Correct answer:</b> <span class="good">'+q.o[q.a]+'</span></p>')
+      +'<p class="why">'+q.exp+'</p>'+(q.note?'<div class="note">'+q.note+'</div>':'')+'</div>';
+  }
+
+  app.innerHTML =
+    '<div class="bar"><button class="linkbtn" id="exit">← All quizzes</button></div>'
+    +'<p class="quizname">'+quiz.title+(S.full?'':' (missed items retry)')+' complete</p>'
+    +'<div class="card"><div class="score">'+correct+'<small>/ '+total+' correct ('+pct+'%)</small></div>'
+    +(hasPts?'<p class="sub">Points: <b>'+pts+' / '+ptsTotal+'</b> (items marked 2 pts count double)</p>':'')
+    +(skipped?'<p class="sub">'+skipped+' unanswered '+(skipped===1?'item was':'items were')+' counted as missed.</p>':'')
+    +'<p class="sub">'+msg+'</p>'+topics
+    +'<div class="actions">'
+    +'<button class="btn ghost" id="backq">Back to questions</button>'
+    +(missed.length?'<button class="btn" id="retry">Retry the '+missed.length+' missed</button>':'')
+    +'<button class="btn ghost" id="retake">Retake full quiz</button></div></div>'
+    +(missed.length?'<h3 class="sec">Missed or unanswered ('+missed.length+')</h3>'+missed.map(item).join(""):'<h3 class="sec">Perfect run</h3><p class="sub">No missed items.</p>')
+    +'<details><summary>Review all '+total+' questions</summary>'+S.idxs.map(item).join("")+'</details>';
+  window.scrollTo(0,0);
+  S.missed=missed;
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button, input");
+  if(!t)return;
+  if(t.dataset.start){start(t.dataset.start);}
+  else if(t.dataset.pick!==undefined){pick(parseInt(t.dataset.pick,10));}
+  else if(t.dataset.go!==undefined){goTo(parseInt(t.dataset.go,10));}
+  else if(t.id==="next"){next();}
+  else if(t.id==="prev"){prev();}
+  else if(t.id==="finish"){tryFinish();}
+  else if(t.id==="finishnow"){results();}
+  else if(t.id==="keepgoing"){S.confirmFinish=false;renderQ(false);}
+  else if(t.id==="backq"){S.done=false;S.pos=0;renderQ(false);window.scrollTo(0,0);}
+  else if(t.id==="exit"){home();}
+  else if(t.id==="retry"){start(S.id,S.missed);}
+  else if(t.id==="retake"){start(S.id);}
+});
+document.addEventListener("change",e=>{
+  if(e.target.id==="shQ")settings.shuffleQ=e.target.checked;
+  if(e.target.id==="shO")settings.shuffleO=e.target.checked;
+});
+document.addEventListener("toggle",e=>{
+  if(S&&e.target&&e.target.id==="jump")S.gridOpen=e.target.open;
+},true);
+document.addEventListener("keydown",e=>{
+  if(!S||S.done||e.ctrlKey||e.metaKey||e.altKey)return;
+  const k=e.key.toLowerCase();
+  const map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
+  if(k in map){pick(map[k]);}
+  else if(k==="arrowright"){next();}
+  else if(k==="arrowleft"){prev();}
+  else if(k==="enter"&&!(document.activeElement&&document.activeElement.tagName==="BUTTON")){next();}
+});
+
+home();
+</script>
+</body>
+</html>
